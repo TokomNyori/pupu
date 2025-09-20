@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS hostel_management;
-CREATE DATABASE hostel_management;
-USE hostel_management;
+DROP DATABASE IF EXISTS hostel_management2;
+CREATE DATABASE hostel_management2;
+USE hostel_management2;
 
 -- 1. students Table
 CREATE TABLE students (
@@ -36,7 +36,7 @@ CREATE TABLE accommodations (
     room_id INT NOT NULL,
     check_in_date DATE NOT NULL,
     status ENUM('Active', 'Checked Out') DEFAULT 'Active',
-    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (room_id) REFERENCES rooms(room_id)
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE payments (
     payment_date DATE NOT NULL,
     payment_type ENUM('Rent', 'Deposit') NOT NULL,
     status ENUM('Paid', 'Pending') DEFAULT 'Paid',
-    FOREIGN KEY (student_id) REFERENCES students(student_id)
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
 
 
@@ -106,76 +106,93 @@ INSERT INTO payments (student_id, amount, payment_date, payment_type, status) VA
 
 
 SELECT 
-    s.name AS student_name,
-    h.hostel_name,
-    r.room_number,
-    r.monthly_rent,
-    s.phone
-FROM students s
-JOIN accommodations a ON s.student_id = a.student_id
-JOIN rooms r ON a.room_id = r.room_id
-JOIN hostels h ON r.hostel_id = h.hostel_id
-WHERE a.status = 'Active'
-ORDER BY h.hostel_name, r.room_number;
+    students.name AS student_name,
+    hostels.hostel_name,
+    rooms.room_number,
+    rooms.monthly_rent,
+    students.phone
+FROM students
+JOIN accommodations ON students.student_id = accommodations.student_id
+JOIN rooms ON accommodations.room_id = rooms.room_id
+JOIN hostels ON rooms.hostel_id = hostels.hostel_id
+WHERE accommodations.status = 'Active'
+ORDER BY hostels.hostel_name, rooms.room_number;
 
 
 SELECT 
-    s.name AS student_name,
-    s.email,
-    p.amount,
-    p.payment_date,
-    p.payment_type
-FROM students s
-JOIN payments p ON s.student_id = p.student_id
-WHERE p.status = 'Pending'
-ORDER BY p.payment_date;
+    students.name AS student_name,
+    students.email,
+    payments.amount,
+    payments.payment_date,
+    payments.payment_type
+FROM students
+JOIN payments ON students.student_id = payments.student_id
+WHERE payments.status = 'Pending'
+ORDER BY payments.payment_date;
 
 
 SELECT 
-    h.hostel_name,
-    h.hostel_type,
-    COUNT(a.student_id) AS students_count,
-    h.total_rooms,
-    (h.total_rooms - COUNT(DISTINCT r.room_id)) AS available_rooms
-FROM hostels h
-LEFT JOIN rooms r ON h.hostel_id = r.hostel_id
-LEFT JOIN accommodations a ON r.room_id = a.room_id AND a.status = 'Active'
-GROUP BY h.hostel_id, h.hostel_name, h.hostel_type, h.total_rooms;
+    hostels.hostel_name,
+    hostels.hostel_type,
+    COUNT(accommodations.student_id) AS students_count,
+    hostels.total_rooms,
+    (hostels.total_rooms - COUNT(DISTINCT rooms.room_id)) AS available_rooms
+FROM hostels
+LEFT JOIN rooms ON hostels.hostel_id = rooms.hostel_id
+LEFT JOIN accommodations ON rooms.room_id = accommodations.room_id AND accommodations.status = 'Active'
+GROUP BY hostels.hostel_id, hostels.hostel_name, hostels.hostel_type, hostels.total_rooms;
 
 
 SELECT 
-    payment_type,
-    status,
+    payments.payment_type,
+    payments.status,
     COUNT(*) AS payment_count,
-    SUM(amount) AS total_amount
+    SUM(payments.amount) AS total_amount
 FROM payments
-GROUP BY payment_type, status
-ORDER BY payment_type, status;
+GROUP BY payments.payment_type, payments.status
+ORDER BY payments.payment_type, payments.status;
 
 
 SELECT 
-    h.hostel_name,
-    r.room_number,
-    r.capacity,
-    r.monthly_rent,
+    hostels.hostel_name,
+    rooms.room_number,
+    rooms.capacity,
+    rooms.monthly_rent,
     'Available' AS room_status
-FROM rooms r
-JOIN hostels h ON r.hostel_id = h.hostel_id
-LEFT JOIN accommodations a ON r.room_id = a.room_id AND a.status = 'Active'
-WHERE a.room_id IS NULL
-ORDER BY h.hostel_name, r.room_number;
+FROM rooms
+JOIN hostels ON rooms.hostel_id = hostels.hostel_id
+LEFT JOIN accommodations ON rooms.room_id = accommodations.room_id AND accommodations.status = 'Active'
+WHERE accommodations.room_id IS NULL
+ORDER BY hostels.hostel_name, rooms.room_number;
+
+
+SELECT 
+    students.student_id, 
+    students.name, 
+    students.email, 
+    students.phone, 
+    students.gender 
+FROM students 
+WHERE students.email = 'tokom@email.com';
+
+
+SELECT 
+    students.student_id, 
+    students.name, 
+    students.email, 
+    students.phone, 
+    students.gender 
+FROM students 
+WHERE LOWER(students.name) LIKE LOWER('%Pupu%');
 
 
 
+-- Success message
 SELECT 'Database created successfully!' AS status;
 
-SELECT 'TABLE COUNTS:' AS info;
-SELECT 'Students' AS table_name, COUNT(*) AS records FROM students
-UNION ALL
-SELECT 'Hostels', COUNT(*) FROM hostels
-UNION ALL
-SELECT 'Rooms', COUNT(*) FROM rooms
-UNION ALL
-SELECT 'Accommodations', COUNT(*) FROM accommodations
-UNION ALL
-SELECT 'Payments', COUNT(*) FROM payments;
+-- Count each table separately  
+SELECT COUNT(*) AS total_students FROM students;
+SELECT COUNT(*) AS total_hostels FROM hostels;
+SELECT COUNT(*) AS total_rooms FROM rooms;
+SELECT COUNT(*) AS total_accommodations FROM accommodations;
+SELECT COUNT(*) AS total_payments FROM payments;
