@@ -63,13 +63,14 @@ def find_student_by_email(cursor, email):
         print(f"❌ Error searching by email: {e}")
 
 
+
 # Find all students with the same name....!!!!!!!!!
 def find_students_by_name(cursor, name):
     try:
         query = """
         SELECT student_id, name, email, phone, gender 
         FROM students 
-        WHERE name LIKE %s
+        WHERE LOWER(name) LIKE LOWER(%s)
         """
 
         cursor.execute(query, (f"%{name}%",))
@@ -88,6 +89,7 @@ def find_students_by_name(cursor, name):
 
     except mysql.connector.Error as e:
         print(f"❌ Error searching by name: {e}")
+
 
 
 # Delete a student by email address....!!!!!!!!!
@@ -112,3 +114,4 @@ def delete_student_by_email(cursor, email):
 
     except mysql.connector.Error as e:
         print(f"❌ Error deleting student: {e}")
+
