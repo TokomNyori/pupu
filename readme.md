@@ -2,11 +2,6 @@
 
 hey pupu! here's the simple version... read it slowly and you'll get it
 
-## what this is
-
-this project is a tiny mysql-backed system for managing hostel data (students, hostels, rooms, payments)... you can run it, see how data is created, and try a few search functions  
-we kept things simple so you can focus on understanding the flow... not memorizing fancy stuff
-
 ## files you'll see
 
 - `app.py`: the main file you run... connects to mysql and calls the other functions
@@ -78,7 +73,7 @@ create_tables(cursor)
 insert_sample_data(cursor)
 ```
 
-`cursor = conn.cursor()` - think of this like a remote control for the database... we use it to send commands  
+`cursor = conn.cursor()` - it is like a remote control for the database... we use it to send commands  
 then we call these in order:
 
 - **setup_database(cursor)** - creates the `hostel_management` database
@@ -156,3 +151,4 @@ python app.py
 - can't connect: start the mysql service first
 
 that's it... message me if something looks confusing and we'll fix it together
+
