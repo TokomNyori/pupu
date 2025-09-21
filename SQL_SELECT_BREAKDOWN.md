@@ -17,7 +17,7 @@ ORDER BY hostels.hostel_name, rooms.room_number
 """
 ```
 
-### what this is doing in simple words
+### what this is doing?
 
 - we start from the `students` table... but room number, hostel name, rent are not there... so we join other tables to show full info about the student
 
@@ -46,4 +46,5 @@ ORDER BY hostels.hostel_name, rooms.room_number
 ### filter and sort
 
 - `WHERE accommodations.status = 'Active'` — only show students who are currently staying  
+
 - `ORDER BY hostels.hostel_name, rooms.room_number` — sort by hostel, then room... looks clean and easy to read
